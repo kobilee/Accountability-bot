@@ -1,0 +1,20 @@
+{
+  "name": "accountability-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/rest": "^1.7.1",
+    "discord-api-types": "^0.37.48",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.2",
+    "sqlite3": "^5.1.6"
+  }
+}
