@@ -3,6 +3,7 @@ module.exports = {
         CREATE TABLE IF NOT EXISTS todos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL,
+            server_id INTEGER NOT NULL,
             listMessage TEXT NOT NULL,
             date TEXT NOT NULL,
             active BOOLEAN NOT NULL
@@ -21,7 +22,7 @@ module.exports = {
     `,
 
     insertTodo: `
-        INSERT INTO todos (username, listMessage, date, active) VALUES (?, ?, ?, ?);
+        INSERT INTO todos (username, server_id, listMessage, date, active) VALUES (?, ?, ?, ?, ?);
     `,
 
     insertTask: `

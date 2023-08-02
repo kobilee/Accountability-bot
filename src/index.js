@@ -23,12 +23,13 @@ client.on('ready', (c) => {
     console.log(`${c.user.tag} is online!`);
     db.run(queries.createTodosTable);
     db.run(queries.createTasksTable);
-    cron.schedule('0 8 * * *', async function() {
+    cron.schedule('0 12 * * *', async function() {
         console.log('running a task every day at 8 AM');
         client.guilds.cache.each(async guild => {
             guild.channels.cache.each(async channel => {
                 if (channel.name.startsWith('todo-')) {
-                    const username = channel.name.slice('todo-'.length);
+                    const channelId = channel.id;
+                    const username = db.get(queries.getTodoUser, [channelId]);
                     let user;
                     try {
                         await guild.members.fetch();
@@ -41,9 +42,9 @@ client.on('ready', (c) => {
                         const listMessage = await channel.send(`Tasks for ${dateStr}:\n No tasks yet.`);
                         let dailyTasks = db.all(queries.getDailyTasks)
 
-                        db.run(queries.deactivateTodos, [username])
-                        db.run(queries.insertTodo, [message.author, listMessage.id, dateStr, true]);
-                        const todolist = await db.get(queries.getTodo, [user]);
+                        db.run(queries.deactivateTodos, [channelId])
+                        db.run(queries.insertTodo, [message.author, channelId, listMessage.id, dateStr, true]);
+                        const todolist = await db.get(queries.getTodo, [channelId]);
                         if (dailyTasks && dailyTasks.length > 0) {
                             dailyTasks.forEach(task => {
                                 db.run(queries.insertTask, [task.description, false, task.daily, todolist.id]);
@@ -54,14 +55,33 @@ client.on('ready', (c) => {
             });
         });
     });
+    const reminders = [
+    "Hey @everyone, don't forget to give your daily update! We are on the edge of our seats!",
+    "Update time, @everyone! Let's see what amazing things you've accomplished today.",
+    "@everyone, time to brag about what you've done today! Please update us.",
+    "A little bird told me that @everyone hasn't given their updates yet! Chirp, chirp!",
+    "Listen up, @everyone! It's time to share your progress and inspire others with your update.",
+    "Just a friendly reminder for @everyone to update us. We're all ears!",
+    "Knock, knock, @everyone! Who's there? Update. Update who? Update YOU!",
+    "Update time! @everyone, remember, a shared accomplishment is a happy accomplishment.",
+    "Ding Dong! That's your update alarm @everyone! Don't let it snooze.",
+    "Hey @everyone, let your progress shine! Time for an update.",
+    "Roses are red, violets are blue, @everyone, where's the update from you?",
+    "@everyone, success is a journey, not a destination. Good day or bad, we're all here to support each other. Let's hear your updates!",
+    "Hey @everyone, remember, every experience is a stepping stone to where you need to go. That includes the highs and lows. What's your update today?",
+    "Hi @everyone, remember that bumps on the road are a part of the journey. Don't hesitate to share them along with your victories. Let's get those updates rolling!",
+    "Hello @everyone, let's keep the transparency real and strong. Successes, obstacles, and everything in between – they all count. What's your update for today?",
+    "Hey there @everyone, our path to progress includes sunny days and rainy ones. Don't be shy to share both. So, what's your update today?"
+    ];
+
     const sendReminder = () => {
-        const updateChannel = client.channels.cache.get('update_channel_id');
+        const updateChannel = client.channels.cache.get('1131388867195457567');
+        const reminder = reminders[Math.floor(Math.random() * reminders.length)];
+        updateChannel.send(reminder);
+    };
       
-        updateChannel.send('@everyone, please remember to give an update!');
-      };
-      
-      cron.schedule('0 12 * * *', sendReminder);
-      cron.schedule('0 17 * * *', sendReminder);
+      cron.schedule('0 16 * * *', sendReminder);
+      cron.schedule('0 21 * * *', sendReminder);
 });
 
 client.on('channelDelete', async (channel) => {
@@ -130,7 +150,7 @@ client.on('messageCreate', async message => {
                 newChannel.send(`${message.author}, your todo channel has been created!`);
 
                 const listMessage = await newChannel.send(`Tasks for ${dateStr}:\n No tasks yet`);
-                db.run(queries.insertTodo, [message.author.username, listMessage.id, dateStr, true]);
+                db.run(queries.insertTodo, [message.author.username, newChannel.id, listMessage.id, dateStr, true]);
             
                 const categoryId = "1130555817368764578"
                 newChannel.setParent(categoryId)
